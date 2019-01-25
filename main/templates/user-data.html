@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <title>Flask + Celery Examples</title>
+  </head>
+  <body>
+    <button id="start-bg-job">Start Long Calculation</button><br><br>
+    <p id="status"></p>
+    <p id="download"></p>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+        function start_task() {
+            // send ajax POST request to start background job
+            $.ajax({
+                type: 'POST',
+                url: '/task/status/',
+                success: function(data, status, request) {
+                    status_url = request.getResponseHeader('Location');
+                    update_progress(status_url);
+                },
+                error: function() {
+                    alert('Unexpected error');
+                }
+            });
+        }
+        function update_progress(status) {
+            // send GET request to status URL
+            $.getJSON(status_url, function(data) {
+                // update UI
+                status = data['status']
+                current = data['current']
+                document.getElementById('status').innerHTML = status + ' - ' + current
+                if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
+                    if ('filename' in data) {
+                        // show result
+                        console.log(data['filename']);
+                        document.getElementById('download').innerHTML = '<a href="/static/data.txt">Download</a>';
+                    }
+                    else {
+                        // something unexpected happened
+                        $('#download').text('Result: ' + data['state']);
+                    }
+                }
+                else {
+                    setTimeout(function() {
+                        update_progress(status_url);
+                    }, 1000);
+                }
+            });
+        }
+        $(function() {
+            $('#start-bg-job').click(start_task);
+        });
+    </script>
+  </body>
+</html>

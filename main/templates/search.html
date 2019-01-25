@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+<h1>Here are your results</h1>
+{% block content %}
+    <h4 class="article-metadata">Results for "{{ keyword }}"</h4>
+    {% for search in response.hits.hits  %}
+    <article  class="media content-section">
+        <div class="media-body">
+            <p>{{ search._source.title }}</p>
+        </div>
+    </article>
+    {% endfor %}
+{% endblock %}
